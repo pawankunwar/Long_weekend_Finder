@@ -1,0 +1,9 @@
+server:
+  port: 8081 
+# google:
+#   calendar:
+#     oauth:
+#       client-id: 700915047834-2arog11bffjpidjmu99s7c22i9641gup.apps.googleusercontent.com
+#       client-secret: GOCSPX-...
+#       port: 8888
+#       redirect-uri: http://localhost:8888/Callback 

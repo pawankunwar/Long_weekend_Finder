@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: layout(~{::title}, ~{::section}, ~{::script})">
+<head>
+    <title>Long Weekend Finder - Google Calendar</title>
+</head>
+<body>
+    <section>
+        <div class="container mt-5">
+            <h2 class="mb-4">Find Long Weekends from Google Calendar</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form id="googleCalendarForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="country" class="form-label">Country</label>
+                            <select id="country" name="country" class="form-select" required>
+                                <option value="">Select a country</option>
+                                <option th:each="country : ${countries}"
+                                        th:value="${country.code}"
+                                        th:text="${country.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="year" class="form-label">Year</label>
+                            <select id="year" name="year" class="form-select" required>
+                                <option value="">Select a year</option>
+                                <option th:each="year : ${#numbers.sequence(2024, 2030)}"
+                                        th:value="${year}"
+                                        th:text="${year}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Find Long Weekends
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="results" class="d-none">
+                <h3 class="mb-3">Long Weekends Found</h3>
+                <div id="longWeekendsList" class="row"></div>
+            </div>
+
+            <div id="loading" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <div id="error" class="alert alert-danger d-none" role="alert"></div>
+        </div>
+    </section>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            $('#googleCalendarForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const country = $('#country').val();
+                const year = $('#year').val();
+                
+                if (!country || !year) {
+                    $('#error').text('Please select both country and year').removeClass('d-none');
+                    return;
+                }
+                
+                $('#loading').removeClass('d-none');
+                $('#results').addClass('d-none');
+                $('#error').addClass('d-none');
+                
+                $.get('/api/long-weekends', { country, year })
+                    .done(function(data) {
+                        $('#longWeekendsList').empty();
+                        
+                        if (data.length === 0) {
+                            $('#error').text('No long weekends found for the selected criteria').removeClass('d-none');
+                            return;
+                        }
+                        
+                        data.forEach(function(weekend) {
+                            const card = `
+                                <div class="col-md-6 mb-3">
+                                    <div class="card result-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${weekend.holidayName}</h5>
+                                            <p class="card-text">
+                                                <strong>Duration:</strong> ${weekend.numberOfDays} days<br>
+                                                <strong>Start:</strong> ${new Date(weekend.startDate).toLocaleDateString()}<br>
+                                                <strong>End:</strong> ${new Date(weekend.endDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            $('#longWeekendsList').append(card);
+                        });
+                        
+                        $('#results').removeClass('d-none');
+                    })
+                    .fail(function() {
+                        $('#error').text('Error fetching long weekends. Please try again.').removeClass('d-none');
+                    })
+                    .always(function() {
+                        $('#loading').addClass('d-none');
+                    });
+            });
+        });
+    </script>
+</body>
+</html> 

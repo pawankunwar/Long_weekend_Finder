@@ -1,0 +1,24 @@
+/* Custom styles for Long Weekend Finder */
+.feature-card {
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.result-card {
+    border-left: 4px solid #0d6efd;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.error-message {
+    display: none;
+    margin: 20px 0;
+} 
