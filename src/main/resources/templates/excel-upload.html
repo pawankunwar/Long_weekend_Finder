@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: layout(~{::title}, ~{::section}, ~{::script})">
+<head>
+    <title>Long Weekend Finder - Excel Upload</title>
+</head>
+<body>
+    <section>
+        <div class="container mt-5">
+            <h2 class="mb-4">Find Long Weekends from Excel File</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form id="excelUploadForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="country" class="form-label">Country</label>
+                            <select id="country" name="country" class="form-select" required>
+                                <option value="">Select a country</option>
+                                <option th:each="country : ${countries}"
+                                        th:value="${country.code}"
+                                        th:text="${country.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="file" class="form-label">Excel File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+                            <div class="form-text">
+                                File should have two columns: Holiday Name and Date (YYYY-MM-DD)
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>Upload and Find Long Weekends
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="results" class="d-none">
+                <h3 class="mb-3">Long Weekends Found</h3>
+                <div id="longWeekendsList" class="row"></div>
+            </div>
+
+            <div id="loading" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <div id="error" class="alert alert-danger d-none" role="alert"></div>
+        </div>
+    </section>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            $('#excelUploadForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const country = $('#country').val();
+                const file = $('#file')[0].files[0];
+                
+                if (!country || !file) {
+                    $('#error').text('Please select both country and file').removeClass('d-none');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('country', country);
+                formData.append('file', file);
+                
+                $('#loading').removeClass('d-none');
+                $('#results').addClass('d-none');
+                $('#error').addClass('d-none');
+                
+                $.ajax({
+                    url: '/api/upload-excel',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        $('#longWeekendsList').empty();
+                        
+                        if (data.length === 0) {
+                            $('#error').text('No long weekends found in the uploaded file').removeClass('d-none');
+                            return;
+                        }
+                        
+                        data.forEach(function(weekend) {
+                            const card = `
+                                <div class="col-md-6 mb-3">
+                                    <div class="card result-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${weekend.holidayName}</h5>
+                                            <p class="card-text">
+                                                <strong>Duration:</strong> ${weekend.numberOfDays} days<br>
+                                                <strong>Start:</strong> ${new Date(weekend.startDate).toLocaleDateString()}<br>
+                                                <strong>End:</strong> ${new Date(weekend.endDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            $('#longWeekendsList').append(card);
+                        });
+                        
+                        $('#results').removeClass('d-none');
+                    },
+                    error: function() {
+                        $('#error').text('Error processing the file. Please check the format and try again.').removeClass('d-none');
+                    },
+                    complete: function() {
+                        $('#loading').addClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
