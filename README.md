@@ -34,7 +34,3 @@ A Spring Boot application to find long weekends based on holidays.
 
 - Find long weekends based on holidays.
 - Configurable server port and database settings.
-
-## License
-
-This project is licensed under the MIT License. 
