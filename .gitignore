@@ -38,4 +38,4 @@ out/
 ### Credentials ###
 credentials.json
 token.json
-
+StoredCredential
