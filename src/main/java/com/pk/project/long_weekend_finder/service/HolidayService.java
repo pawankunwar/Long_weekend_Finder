@@ -22,7 +22,7 @@ public class HolidayService {
     @Autowired
     private HolidayRepository holidayRepository;
 
-    // private GoogleCalendarService googleCalendarService;
+     private GoogleCalendarService googleCalendarService;
 
     public List<Holiday> getHolidaysForCountry(String country) throws IOException {
         // Get current year

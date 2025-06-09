@@ -20,28 +20,22 @@ import java.util.List;
 public class HolidayController {
     private static final Logger logger = LoggerFactory.getLogger(HolidayController.class);
 
-    // private GoogleCalendarService googleCalendarService;
+    @Autowired
+    private GoogleCalendarService googleCalendarService;
 
     @Autowired
     private HolidayService holidayService;
 
-    // public ResponseEntity<List<LongWeekend>> getLongWeekendsFromGoogleCalendar(
-    //         @RequestParam String country,
-    //         @RequestParam int year) throws IOException {
-    //     List<Holiday> holidays = googleCalendarService.getHolidaysForCountry(country, year);
-    //     // Process holidays to find long weekends
-    //     return ResponseEntity.ok(new ArrayList<>());
-    // }
-
     @GetMapping("/long-weekends")
-    public ResponseEntity<List<LongWeekend>> getLongWeekendsFromGoogleCalendar(
-            @RequestParam String country,
-            @RequestParam int year) {
-        logger.info("Fetching long weekends for country: {} and year: {}", country, year);
-        List<Holiday> holidays = new ArrayList<>(); // Initialize holidays
-        List<LongWeekend> longWeekends = holidayService.findLongWeekends(holidays);
+     public ResponseEntity<List<LongWeekend>> getLongWeekendsFromGoogleCalendar(
+             @RequestParam String country,
+             @RequestParam int year) throws IOException {
+         List<Holiday> holidays = googleCalendarService.getHolidaysForCountry(country, year);
+         List<LongWeekend> longWeekends = holidayService.findLongWeekends(holidays);
+         // Process holidays to find long weekends
         return ResponseEntity.ok(longWeekends);
-    }
+     }
+
 
     @PostMapping("/upload-excel")
     public ResponseEntity<List<LongWeekend>> getLongWeekendsFromExcel(
